@@ -20,7 +20,7 @@
  * 退出码：0 全部通过；1 有检查项失败。
  */
 import { execFileSync } from 'node:child_process'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -41,6 +41,46 @@ function fail(label, detail) {
 
 function section(title) {
   console.log(`\n${title}`)
+}
+
+/**
+ * 跑一个子进程，遇到瞬时失败（EBUSY / EAGAIN）自动重试。
+ *
+ * 为什么需要它：这台机器上 `spawnSync git` 偶发 `EBUSY`——进程已经创建但资源
+ * 一时拿不到，跟命令本身无关，隔一会儿再跑就好。真踩过：一次自检里
+ * `git ls-files` 撞上 EBUSY，脚本把异常咽掉、把**安全检查降级成一行提示**，
+ * 结果「本机私有路径」那一栏什么都没扫，却照样打出全绿。
+ * 安全检查悄悄不跑，比没有检查更糟——它给人虚假的安心。
+ *
+ * 所以这里重试，且**调用方必须把最终的失败当成失败**，不许再降级成提示。
+ */
+function runWithRetry(command, args, options, attempts = 4) {
+  let last
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      return execFileSync(command, args, options)
+    } catch (error) {
+      last = error
+      if (error.code !== 'EBUSY' && error.code !== 'EAGAIN') throw error
+      // 同步阻塞一小会儿再试（脚本是同步流程，不能用 await）。
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 120 * (attempt + 1))
+    }
+  }
+  throw last
+}
+
+/** 扫描时跳过的目录：不是源码，也不该进仓库。 */
+const SKIP_DIRS = new Set(['.git', 'node_modules', '.workbuddy-ai'])
+
+/** 递归列出工作区里的文件（相对路径，正斜杠）。git 用不了时的兜底。 */
+function walkFiles(dir, prefix = '', out = []) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (SKIP_DIRS.has(entry.name)) continue
+    const rel = prefix ? `${prefix}/${entry.name}` : entry.name
+    if (entry.isDirectory()) walkFiles(join(dir, entry.name), rel, out)
+    else if (entry.isFile()) out.push(rel)
+  }
+  return out
 }
 
 /**
@@ -302,7 +342,7 @@ if (missingImages.length === 0) {
 section('打包产物（npm pack，与 pnpm 的 git 依赖同一套 packlist）')
 let packed = null
 try {
-  const raw = execFileSync('npm', ['pack', '--dry-run', '--json'], {
+  const raw = runWithRetry('npm', ['pack', '--dry-run', '--json'], {
     cwd: ROOT,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -311,7 +351,9 @@ try {
   const start = raw.indexOf('[')
   packed = JSON.parse(raw.slice(start))[0]?.files?.map((f) => f.path) ?? null
 } catch (error) {
-  notes.push(`npm pack 未能执行（${error.message.split('\n')[0]}），跳过产物清单检查`)
+  // 不降级成提示：产物清单是这条闸门最核心的检查——`files` 白名单漏了运行时文件，
+  // 源码目录里完全看不出来，用户装到的是残包。跑不了就说跑不了。
+  fail('npm pack 无法执行', `${error.message.split('\n')[0]}；产物清单与 files 白名单没有被验证`)
 }
 
 if (packed) {
@@ -362,25 +404,48 @@ section('本机私有路径')
 // 一行 YAML 示例里的真实路径，在 diff 里毫不起眼，但推上去就永久留在公开仓库和 git 历史里。
 // 真漏过一次：DoneVoice 的 NATIVE.md 的 hmr 示例里写着开发机的实际路径。
 //
-// ⚠️ 这里**刻意不维护「私有字符串黑名单」**。第一版就是那么写的——把开发机的目录名列进脚本里，
-//    结果脚本自己成了泄漏源：为了检测某个私有名字而把它抄进公开仓库，等于帮倒忙。
-//    所以改成**结构判断**：盘符绝对路径的**第一段**不在通用名单里，就视为「本机真实路径」。
+// ⚠️ 这里**刻意不维护「私有字符串黑名单」**。DoneVoice 的第一版就是那么写的——把开发机的
+//    目录名列进脚本里，结果脚本自己成了泄漏源：为了检测某个私有名字而把它抄进公开仓库，
+//    等于帮倒忙。所以改成**结构判断**：盘符绝对路径的**第一段**不在通用名单里，就视为
+//    「本机真实路径」。
+//
+//    这份名单装的是**通用词（放行）**，不是私有词（拦截）——前者可以公开，后者不能。
+//    真踩过：第一版只放行了 users/windows 这些系统目录，于是测试夹具里的
+//    `C:/proj`、`C:/quality` 被当成泄漏报了出来。夹具本来就用假路径，
+//    而**一段式的盘符路径（`C:/proj`）根本指认不到任何人**，没必要拦。
 const GENERIC_PATH_SEGMENTS = new Set([
-  'users', 'windows', 'program files', 'program files (x86)', 'programdata',
-  'path', 'to', 'public', 'temp', 'tmp', 'appdata', 'ds', 'dsh',
+  // 系统目录
+  'users', 'windows', 'program files', 'program files (x86)', 'programdata', 'appdata',
+  // 占位符与文档里常见的通用词
+  'path', 'to', 'public', 'temp', 'tmp', 'ds', 'dsh',
+  // 夹具 / 示例里常见的通用词（写测试时的假路径）
+  'proj', 'project', 'projects', 'quality', 'test', 'tests', 'src', 'app', 'apps',
+  'repo', 'repos', 'workspace', 'workspaces', 'example', 'examples', 'sample', 'samples',
+  'sandbox', 'foo', 'bar', 'some', 'your', 'my', 'x', 'y',
 ])
 // 前一个字符不能是字母数字或连字符，否则会误伤 `dsh-app://app`、`https://…` 这类协议串。
 const DRIVE_PATH = /(?<![-\w])[A-Za-z]:[\\/][^\s`"'|,;)\]}]*/g
 const SCANNED_EXTENSIONS = /\.(?:md|js|mjs|json|yml|yaml|txt|svg|html|css)$/i
 
 let trackedFiles = []
+let scanSource = ''
 try {
-  trackedFiles = execFileSync('git', ['ls-files'], { cwd: ROOT, encoding: 'utf8' })
+  trackedFiles = runWithRetry('git', ['ls-files'], { cwd: ROOT, encoding: 'utf8' })
     .trim()
     .split('\n')
     .filter(Boolean)
-} catch {
-  notes.push('git ls-files 失败（还不是 git 仓库？），跳过后本机私有路径扫描')
+  scanSource = 'git ls-files'
+} catch (gitError) {
+  // 兜底：直接走工作区。语义上不如 git ls-files 准（会带上被 .gitignore 忽略的本地
+  // 文件，可能多报），但**绝不跳过**——扫描宁可多报，不可不跑。
+  // 把失败原因写进结论里：换了一种扫法却不说，等于另一种静默降级。
+  try {
+    trackedFiles = walkFiles(ROOT)
+    const why = gitError.code ?? gitError.message.split('\n')[0]
+    scanSource = `工作区遍历（git ls-files 失败：${why}；可能含被忽略的本地文件）`
+  } catch (error) {
+    fail('本机私有路径扫描未能执行', `${error.message.split('\n')[0]}；这一项没有被验证`)
+  }
 }
 
 if (trackedFiles.length > 0) {
@@ -406,7 +471,7 @@ if (trackedFiles.length > 0) {
     }
   }
   if (suspiciousPaths.length === 0) {
-    ok('无本机私有路径', `扫描 ${trackedFiles.length} 个被跟踪文件`)
+    ok('无本机私有路径', `${scanSource}，共 ${trackedFiles.length} 个文件`)
   } else {
     fail('检出疑似本机私有路径', `${[...new Set(suspiciousPaths)].join('；')}；改成 <你的…> 这类占位符再提交`)
   }

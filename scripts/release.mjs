@@ -155,6 +155,24 @@ if (target === current && !args.tagCurrent) {
 }
 
 const tag = `v${target}`
+
+// 空仓库（还没有任何提交）时 `git rev-parse HEAD` 会以 128 退出。不特判的话，
+// 首次发版的人看到的就是一屏 Node 堆栈——而那正是这个脚本最可能被第一次运行的时刻。
+try {
+  execFileSync('git', ['rev-parse', '--verify', 'HEAD'], {
+    cwd: ROOT,
+    stdio: ['ignore', 'pipe', 'pipe'],
+  })
+} catch {
+  console.error('这个仓库还没有任何提交，发版脚本无从下手。\n')
+  console.error('先做第一次提交：')
+  console.error('  git add -A')
+  console.error(`  git commit -m "初始提交：${pkg.name} ${current}"\n`)
+  console.error('然后再跑（首次发版用 --tag-current 给当前版本补标签）：')
+  console.error('  node scripts/release.mjs --tag-current --apply --push')
+  process.exit(1)
+}
+
 const branch = git(['rev-parse', '--abbrev-ref', 'HEAD'], { quiet: true })
 const dirty = git(['status', '--porcelain'], { quiet: true })
 const existingTags = git(['tag', '--list', tag], { quiet: true })
