@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56"
+     fill="none" stroke="#1f2328" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="对话式">
+  <path d="M50 34 A4 4 0 0 1 46 38 H18 L6 45 V12 A4 4 0 0 1 10 8 H46 A4 4 0 0 1 50 12 Z" />
+  <circle cx="19" cy="23" r="2" />
+  <circle cx="28" cy="23" r="2" />
+  <circle cx="37" cy="23" r="2" />
+</svg>

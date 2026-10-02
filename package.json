@@ -1,0 +1,80 @@
+{
+  "name": "dsh-prompt-studio",
+  "version": "1.0.0",
+  "description": "提示词优化工坊：多风格一键优化、发送时自动优化，风格可在设置页自由增删改。Prompt rewriting studio for DeepSeek Harness.",
+  "license": "MIT",
+  "author": {
+    "name": "zyw",
+    "url": "https://github.com/zywnb-2"
+  },
+  "type": "module",
+  "main": "index.js",
+  "icon": "./icon.svg",
+  "scripts": {
+    "check": "node scripts/check-package.mjs",
+    "test": "node test/smoke.mjs && node test/client-smoke.mjs && node test/quality.mjs",
+    "release": "node scripts/release.mjs"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "prompt",
+    "prompt-engineering",
+    "prompt-optimizer",
+    "rewrite"
+  ],
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "icon.svg",
+    "locale/*.json",
+    "README.md",
+    "CHANGELOG.md",
+    "RELEASE.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "manifestVersion": 1,
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-api-remotes",
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-settings"
+      ]
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "*"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=20",
+    "dsh": "0.2.0-rc.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zywnb-2/dsh-prompt-studio.git"
+  },
+  "homepage": "https://github.com/zywnb-2/dsh-prompt-studio#readme",
+  "bugs": {
+    "url": "https://github.com/zywnb-2/dsh-prompt-studio/issues"
+  }
+}

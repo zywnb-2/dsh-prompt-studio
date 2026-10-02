@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56"
+     fill="none" stroke="#1f2328" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="学术严谨">
+  <path d="M28 12 L50 23 L28 34 L6 23 Z" />
+  <path d="M13 27.5 V37 C13 41.5 19.5 44 28 44 C36.5 44 43 41.5 43 37 V27.5" />
+  <path d="M50 23 V32.5" />
+  <circle cx="50" cy="36" r="3" />
+</svg>

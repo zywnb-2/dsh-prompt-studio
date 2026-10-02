@@ -1,0 +1,51 @@
+name: CI
+
+# 校验包结构、入口 id 契约、README 文档与三个测试；GitHub 探活受用户网络影响，
+# 实际 DSH 启动还需在目标版本真机验证。检查逻辑在 scripts/check-package.mjs。
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'RELEASE.md'
+      - 'docs/**'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: 发布自检 (${{ matrix.os }} / node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: ['20', '22']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: 语法检查（宿主半区、浏览器半区与仓库脚本）
+        shell: bash
+        run: |
+          for file in index.js client.js scripts/check-package.mjs scripts/release.mjs \
+                      scripts/emit-icons.mjs scripts/sync-builtins.mjs scripts/toggle-context.mjs \
+                      scripts/verify-against-reference.mjs scripts/verify-icon-source.mjs; do
+            node --check "$file"
+            echo "ok  $file"
+          done
+
+      # check-package.mjs 内部会跑 test/smoke.mjs、test/client-smoke.mjs、test/quality.mjs，
+      # 所以不需要在 CI 里再重复一遍——发布闸门就是这一个命令。
+      - name: 发布自检
+        run: node scripts/check-package.mjs

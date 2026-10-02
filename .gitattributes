@@ -1,0 +1,17 @@
+# 统一换行符：仓库里一律 LF。
+# Windows 上 git 默认会把工作区换成 CRLF，于是每次提交都刷一堆
+# "LF will be replaced by CRLF" 警告，GitHub 上的 Linux CI 与本地看到的又不是同一份字节。
+# 这里钉死成 LF，两边一致。
+* text=auto eol=lf
+
+# 图标与 patch 文件要逐字节可复现：scripts/emit-icons.mjs 生成的 icons/*.svg
+# 会被 test/client-smoke.mjs 逐条比对，行尾被换过就会全线飘红。
+# 必须写在上面那条**之后**——同一路径上后出现的规则生效。
+*.svg text eol=lf
+cordis.patch.yml text eol=lf
+
+# 二进制：绝不参与任何文本转换或行尾处理（README 里以后放截图会用到）。
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary

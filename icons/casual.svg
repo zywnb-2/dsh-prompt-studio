@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56"
+     fill="none" stroke="#1f2328" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="口语亲和">
+  <circle cx="28" cy="28" r="22" />
+  <circle cx="20" cy="22" r="2.5" />
+  <circle cx="36" cy="22" r="2.5" />
+  <path d="M17 33 C20 39 36 39 39 33" />
+</svg>

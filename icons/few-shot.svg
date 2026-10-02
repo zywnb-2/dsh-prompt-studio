@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56"
+     fill="none" stroke="#1f2328" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="少样本">
+  <rect x="4" y="16" width="16" height="24" rx="2" transform="rotate(-8 12 28)" />
+  <rect x="20" y="14" width="16" height="26" rx="2" />
+  <rect x="36" y="16" width="16" height="24" rx="2" transform="rotate(8 44 28)" />
+</svg>

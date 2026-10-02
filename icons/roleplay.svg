@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56"
+     fill="none" stroke="#1f2328" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="角色扮演">
+  <path d="M10 14 C10 14 10 30 17 38 C21 42.5 26 41 28 37.5 C30 41 35 42.5 39 38 C46 30 46 14 46 14 Z" />
+  <ellipse cx="20" cy="23" rx="5" ry="3.5" />
+  <ellipse cx="36" cy="23" rx="5" ry="3.5" />
+</svg>

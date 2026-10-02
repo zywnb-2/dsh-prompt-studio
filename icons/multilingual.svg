@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56"
+     fill="none" stroke="#1f2328" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="多语言">
+  <circle cx="28" cy="28" r="22" />
+  <path d="M6 28 H50 M28 6 C36 15 36 41 28 50 C20 41 20 15 28 6 Z" />
+  <path d="M10 15 C18 21 38 21 46 15 M10 41 C18 35 38 35 46 41" />
+</svg>

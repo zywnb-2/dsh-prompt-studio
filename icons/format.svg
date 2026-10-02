@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56"
+     fill="none" stroke="#1f2328" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="格式约束">
+  <path d="M20 8 C14 8 14 14 14 20 C14 26 8 28 8 28 C8 28 14 30 14 36 C14 42 14 48 20 48" />
+  <path d="M36 8 C42 8 42 14 42 20 C42 26 48 28 48 28 C48 28 42 30 42 36 C42 42 42 48 36 48" />
+  <rect x="25" y="25" width="6" height="6" rx="1.5" />
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56"
+     fill="none" stroke="#1f2328" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="砖墙">
+  <rect x="6" y="15" width="44" height="27" rx="1.5" />
+  <path d="M6 24 H50 M6 33 H50 M28 15 V24 M17 24 V33 M39 24 V33 M28 33 V42" />
+</svg>

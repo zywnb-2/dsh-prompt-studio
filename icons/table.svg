@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56"
+     fill="none" stroke="#1f2328" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="表格数据">
+  <rect x="6" y="10" width="44" height="36" rx="4" />
+  <path d="M6 22 H50 M6 34 H50 M21 10 V46 M36 10 V46" />
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56"
+     fill="none" stroke="#1f2328" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="打开的书">
+  <path d="M28 17 C23 12.5 15 10.5 7 11.5 L7 40 C15 39 23 41 28 45.5 C33 41 41 39 49 40 L49 11.5 C41 10.5 33 12.5 28 17 Z" />
+  <path d="M28 17 V45.5" />
+</svg>

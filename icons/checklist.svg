@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56"
+     fill="none" stroke="#1f2328" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="清单式">
+  <path d="M6 9 L10 13 L17 5 M6 28 L10 32 L17 24 M6 47 L10 51 L17 43" />
+  <path d="M24 9 H50 M24 28 H50 M24 47 H50" />
+</svg>

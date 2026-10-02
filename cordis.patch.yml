@@ -1,0 +1,5 @@
+# dsh-prompt-studio bundle patch.
+# 把插件的 Host 半区插入当前 profile；浏览器半区由 package.json 的 dsh.client 声明。
+- insert:
+    - id: prompt-studio
+      name: dsh-prompt-studio
